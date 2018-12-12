@@ -1,0 +1,39 @@
+{
+    "name": "CreamCalculator",
+    "description": "A calculator for cream",
+    "author": {
+        "email": "xuzihanapple@live.com",
+        "name": "Stephan Xu"
+    },
+    "homepage": "https://www.mrxzh.com",
+    "version": "0.0.1",
+    "main": "app.js",
+    "scripts": {
+        "start": "chcp 65001 && node .",
+        "pack": "electron-builder --dir",
+        "dist": "electron-builder"
+    },
+    "build": {
+        "appId": "com.CreamCalculator",
+        "mac": {
+            "icon": "fav.png",
+            "category": "public.app-category.utilities",
+            "target": [
+                "dmg"
+            ]
+        },
+        "win": {
+            "icon": "fav.ico",
+            "target": [
+                "nsis",
+                "zip"
+            ]
+        },
+        "linux": {
+            "icon": "fav.png",
+            "target": [
+                "deb"
+            ]
+        }
+    }
+}

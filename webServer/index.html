@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>DataCollector</title>
+
+    <script src="plugins/vue_product.js"></script>
+
+    <script src="plugins/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <!-- solve jquery electron problem -->
+    <script>
+        window.jQuery || document.write('<script src="plugins/jquery-1.11.0.min.js"><\/script>')
+    </script>
+    <script src="plugins/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+
+    <link href="plugins/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="plugins/font-awesome-4.7.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <link rel="stylesheet" href="plugins/buttons.css" />
+
+
+    <style type="text/css">
+        @font-face {
+            font-family: pf-heavy;
+            src: url('font/PingFang Heavy.ttf');
+        }
+
+        @font-face {
+            font-family: pf-mid;
+            src: url('font/PingFang Medium.ttf');
+        }
+
+        @font-face {
+            font-family: pf-light;
+            src: url('font/PingFang Light.ttf');
+        }
+
+        .heavy_text {
+            font-family: pf-heavy;
+        }
+
+        .mid_text {
+            font-family: pf-mid;
+        }
+
+        .light_text {
+            font-family: pf-light;
+        }
+
+
+        .control_btn {
+            color: #181818;
+            position: relative;
+            float: right;
+            top: 0px;
+            width: 45px;
+            height: 30px;
+            line-height: 30px;
+            font-size: 1.1em;
+            z-index: 999;
+            transition: 0.5s;
+            -webkit-app-region: no-drag;
+        }
+
+        .control_btn:hover {
+            color: #181818;
+            position: relative;
+            float: right;
+            right: 0px;
+            top: 0px;
+            width: 45px;
+            height: 30px;
+            line-height: 30px;
+            z-index: 999;
+            font-size: 1.1em;
+            transition: 0.5s;
+            -webkit-app-region: no-drag;
+        }
+
+
+        .shutdown_btn {
+            background-color: none;
+            right: 0px;
+        }
+
+        .shutdown_btn:hover {
+            background: #cd1a2b;
+            right: 0px;
+        }
+
+        .maximize_btn {
+            background-color: none;
+            right: 0px;
+            font-size: 0.9em;
+        }
+
+        .maximize_btn:hover {
+            background: #e5e5e5;
+            right: 0px;
+            font-size: 0.9em;
+        }
+
+        .minimize_btn {
+            background-color: none;
+            right: 0px;
+            font-size: 0.9em;
+        }
+
+        .minimize_btn:hover {
+            background: #e5e5e5;
+            right: 0px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid" id="app">
+        <div class="row" style="-webkit-app-region: drag">
+            <a class="control_btn shutdown_btn text-center" @click="control_btn('shutdown');"><i class="fa fa-times"></i></a>
+            <a class="control_btn maximize_btn text-center" @click="control_btn('max');"><i class="fa fa-window-maximize"></i></a>
+            <a class="control_btn minimize_btn text-center" @click="control_btn('mini')"><i class="fa fa-window-minimize"></i></a>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="container-fluid"  style="-webkit-user-select:none">
+                    <h2 class="heavy_text">启动检测</h2>
+                    <p class="mid_text">输入样品信息，开始自动检测</p>
+                    <form class="form-inline mid_text">
+                        <div class="form-group">
+                            <label for="sampleid">样品编号</label>
+                            <input v-model="input_si" type="text" class="form-control" id="sampleid" placeholder="编号">
+                        </div>
+                        <div class="form-group">
+                            <label for="pigment">色素含量(g)</label>
+                            <input v-model="input_pi" type="text" class="form-control" id="pigment" placeholder="色素">
+                        </div>
+                        <div class="form-group">
+                            <label for="weight">总重量(g)</label>
+                            <input v-model="input_wt" type="text" class="form-control" id="weight" placeholder="总重">
+                        </div>
+                        <div class="form-group">
+                            <label for="temp">温度</label>
+                            <input v-model="input_tm" type="text" class="form-control" id="temp" placeholder="温度">
+                        </div>
+                        <div class="form-group">
+                            <label for="hm">湿度</label>
+                            <input v-model="input_hm" type="text" class="form-control" id="hm" placeholder="湿度">
+                        </div>
+                    </form>
+                    <br />
+                    <button type="button" class="button button-action button-pill mid_text" @click="set_task();">开始检测</button>
+                    <button type="button" class="button button-royal button-circle mid_text" @click="get_all_results();"><i
+                            class="fa fa-refresh"></i></button>
+                    <br />
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="col-xs-12">
+                <hr />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+
+                <div class="container-fluid">
+                    <div class="table-responsive mid_text">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>记录ID</th>
+                                    <th>样品ID</th>
+                                    <th>扫描速率</th>
+                                    <th>结果编号</th>
+                                    <th>温度</th>
+                                    <th>湿度</th>
+                                    <th>色素含量</th>
+                                    <th>总重</th>
+                                    <th>结果文件</th>
+                                    <th>生成时间</th>
+                                    <th>编辑</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in result_list">
+                                    <td v-for="con in item">{{con}}</td>
+                                    <td>
+                                        <button @click="show_edit_block(item[0]);" class="button button-large button-inverse button-border button-circle button-tiny"><i
+                                                class="fa fa-edit"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="donate_tip" tabindex="-1" role="dialog" aria-labelledby="donate_msg_label">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content msg_dialog">
+                    <div class="modal-header text-center msg_header">
+                        <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> -->
+                        <p class="modal-title heavy_text" id="donate_msg_label">编辑</p>
+                    </div>
+                    <div class="modal-body msg_body text-center">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-xs-12">
+                                    <form class="form mid_text">
+                                        <div class="form-group">
+                                            <label for="sampleid">样品编号</label>
+                                            <input v-model="change_si" type="text" class="form-control" id="sampleid"
+                                                placeholder="编号">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="temp">温度</label>
+                                            <input v-model="change_tm" type="text" class="form-control" id="temp"
+                                                placeholder="温度">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="hm">湿度</label>
+                                            <input v-model="change_hm" type="text" class="form-control" id="hm"
+                                                placeholder="湿度">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="pigment">色素含量(g)</label>
+                                            <input v-model="change_pi" type="text" class="form-control" id="pigment"
+                                                placeholder="色素">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="weight">总重量(g)</label>
+                                            <input v-model="change_wt" type="text" class="form-control" id="weight"
+                                                placeholder="总重">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer msg_footer">
+                        <button type="button" class="button button-action button-pill button-small msg_btn"
+                            data-dismiss="modal" @click="edit_item">确定</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+       
+        var vm = new Vue({
+            el: '#app',
+            data: {
+                result_list: [],
+
+                input_si: '',
+                input_tm: '',
+                input_hm: '',
+                input_pi: '',
+                input_wt: '',
+
+                change_id: '',
+                change_si: '',
+                change_tm: '',
+                change_hm: '',
+                change_pi: '',
+                change_wt: '',
+            },
+            computed: {
+
+            },
+            methods: {
+                show_edit_block: function (id) {
+                    $.ajaxSettings.async = false;
+                    var res;
+                    $.post('getlist.php', {
+                        sp: id
+                    }, function (result) {
+                        res = JSON.parse(result);
+                    });
+                    this.change_id = id;
+                    this.change_si = res[0][1];
+                    this.change_tm = res[0][4];
+                    this.change_hm = res[0][5];
+                    this.change_pi = res[0][6];
+                    this.change_wt = res[0][7]
+
+                    $('#donate_tip').modal('show');
+                },
+                edit_item: function (event) {
+                    $.ajaxSettings.async = true;
+                    $.post('edititem.php', {
+                        iid: this.change_id,
+                        si: this.change_si,
+                        tmp: this.change_tm,
+                        hm: this.change_hm,
+                        pi: this.change_pi,
+                        wt: this.change_wt
+                    }, function (result) {
+                        vm.get_all_results(true);
+                    });
+                },
+
+                get_all_results: function (async_flag) {
+                    $.ajaxSettings.async = async_flag;
+                    $.post('getlist.php', {
+                        sp: "all"
+                    }, function (result) {
+                        vm.result_list = JSON.parse(result);
+                        vm.result_list.sort((lh, rh) => {
+                            return rh[0] - lh[0];
+                        });
+                    });
+                },
+
+                refresh_result_list: function () {
+                    this.get_all_results(true);
+                },
+
+                set_task: function () {
+
+                    if (this.input_si.length <= 0 ||
+                        this.input_tm.length <= 0 ||
+                        this.input_hm.length <= 0 ||
+                        this.input_pi.length <= 0 ||
+                        this.input_wt.length <= 0) {
+                        alert('请输入样本信息');
+                        return;
+                    }
+
+                    $.ajaxSettings.async = false;
+                    ret = '';
+                    $.post('settask.php', {
+                        si: this.input_si,
+                        tmp: this.input_tm,
+                        hm: this.input_hm,
+                        pi: this.input_pi,
+                        wt: this.input_wt,
+                    }, function (result) {
+                        ret = result;
+                    });
+                    if (ret != '1') {
+                        alert('启动任务失败，错误信息：' + ret);
+                    } else {
+                        alert('启动成功');
+                    }
+                },
+
+                 control_btn: function (btn_id) {
+                    const { ipcRenderer } = require('electron');
+                    // ipcRenderer.on('asynchronous-reply', (event, arg) => {
+                    //     alert("web2" + arg);// prints "pong"  在electron中web page里的console方法不起作用，因此使用alert作为测试方法
+                    // })
+                    ipcRenderer.send('msg_control_btn', btn_id); // prints "pong"   
+                },
+            },
+            created: function () {
+                this.get_all_results(true);
+                setInterval(this.refresh_result_list, 3000);
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
