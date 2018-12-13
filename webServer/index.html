@@ -11,16 +11,19 @@
 
     <script src="plugins/vue_product.js"></script>
 
-    <!-- <script src="plugins/jquery-1.11.0.min.js" type="text/javascript"></script> -->
-    <!-- solve jquery electron problem -->
+    <!-- Insert this line above script imports  -->
     <script>
-        window.jQuery || document.write('<script src="plugins/jquery-1.11.0.min.js"><\/script>')
-        window.jQuery || document.write('<script src="plugins/highcharts.js"><\/script>')
-        window.jQuery || document.write('<script src="plugins/highcharts-export.js"><\/script>')
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
     </script>
-
-    <!-- <script src="plugins/highcharts.js" type="text/javascript"></script>
-    <script src="plugins/highcharts-export.js" type="text/javascript"></script> -->
+    <!-- normal script imports etc  -->
+    <script src="plugins/highcharts.js"></script>
+    <script src="plugins/highcharts-export.js"></script>
+    <script src="plugins/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <!-- Insert this line after script imports -->
+    <script>if (window.module) module = window.module;</script>
 
     <script src="plugins/bootstrap-3.3.7/js/bootstrap.min.js"></script>
     <link href="plugins/bootstrap-3.3.7/css/bootstrap.min.css" rel="stylesheet">
@@ -122,6 +125,22 @@
             right: 0px;
             font-size: 0.9em;
         }
+
+        @keyframes icon-spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+                transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(359deg);
+                transform: rotate(359deg);
+            }
+        }
+
+        .icon-spin {
+            animation: icon-spin 2s infinite linear;
+        }
     </style>
 </head>
 
@@ -160,10 +179,14 @@
                         </div>
                     </form>
                     <br />
-                    <button type="button" class="button button-action button-pill mid_text" @click="set_task();">开始检测</button>
-                    <button type="button" class="button button-royal button-circle mid_text" @click="get_all_results();"><i
-                            class="fas fa-sync-alt"></i></button>
-                    <button type="button" class="button button-circle mid_text" @click="compareChart();"><i class="fa fa-chart-line"></i></i></button>
+                    <button type="button" :class="startBtnClass" @click="set_task();">
+                        <i key="processing" v-if="task_processing" class="fas fa-cog icon-spin"></i>
+                        <span key="free" v-else>开始检测</span>
+                    </button>
+                    <button type="button" class="button button-royal button-circle mid_text button-longshadow-left"
+                        @click="get_all_results();"><i class="fas fa-sync-alt"></i></button>
+                    <button type="button" class="button button-circle button-royal mid_text button-longshadow-left"
+                        @click="compareChart();"><i class="fa fa-chart-line"></i></i></button>
                     <br />
                 </div>
             </div>
@@ -265,7 +288,7 @@
         </div>
 
         <div class="modal fade bs-example-modal-lg" id="graph_tip" tabindex="-1" role="dialog" aria-labelledby="graph_msg_label">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content msg_dialog">
                     <div class="modal-header text-center msg_header">
                         <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button> -->
@@ -286,11 +309,11 @@
     </div>
 
     <script>
-
         var vm = new Vue({
             el: '#app',
             data: {
                 result_list: [],
+                task_processing: false,
 
                 input_si: '',
                 input_tm: '',
@@ -308,7 +331,16 @@
                 compareList: [],
             },
             computed: {
-
+                startBtnClass: function () {
+                    return {
+                        'button': true,
+                        'mid_text': true,
+                        'button-pill': !this.task_processing,
+                        'button-action': !this.task_processing,
+                        'button-circle': this.task_processing,
+                        'button-caution': this.task_processing,
+                    }
+                },
             },
             methods: {
                 show_edit_block: function (id) {
@@ -358,7 +390,22 @@
                     this.get_all_results(true);
                 },
 
+                peek_task: function () {
+                    $.ajaxSettings.async = false;
+                    $.post('peektask.php', {}, function (result) {
+                        var task_status = result.split('|')[0];
+                        if (task_status === '0') {
+                            vm.task_processing = false;
+                        } else {
+                            vm.task_processing = true;
+                        }
+                    });
+                },
+
                 set_task: function () {
+                    if (this.task_processing) {
+                        return;
+                    }
 
                     if (this.input_si.length <= 0 ||
                         this.input_tm.length <= 0 ||
@@ -383,12 +430,17 @@
                     if (ret != '1') {
                         alert('启动任务失败，错误信息：' + ret);
                     } else {
-                        alert('启动成功');
+                        //success
+                        this.task_processing = true;
                     }
+
+
                 },
 
                 control_btn: function (btn_id) {
-                    const { ipcRenderer } = require('electron');
+                    const {
+                        ipcRenderer
+                    } = require('electron');
                     // ipcRenderer.on('asynchronous-reply', (event, arg) => {
                     //     alert("web2" + arg);// prints "pong"  在electron中web page里的console方法不起作用，因此使用alert作为测试方法
                     // })
@@ -451,8 +503,8 @@
                                 defaultSeriesType: 'spline',
                             },
                             credits: {
-                                text: 'Developed by Stephan Xu',             // 显示的文字
-                                href: 'https://www.mrxzh.com',      // 链接地址
+                                text: 'Developed by Stephan Xu', // 显示的文字
+                                href: 'https://www.mrxzh.com', // 链接地址
                             },
                             title: {
                                 text: "比较图",
@@ -462,7 +514,7 @@
                             },
                             xAxis: {
                                 title: {
-                                    text: 'X'
+                                    text: '波段'
                                 },
                                 type: 'linear',
                                 labels: {
@@ -474,7 +526,7 @@
                             yAxis: {
                                 type: 'linear',
                                 title: {
-                                    text: 'Y'
+                                    text: '吸光率'
                                 },
                             },
                             series: series_obj,
@@ -485,7 +537,8 @@
                                 x: 100,
                                 y: 70,
                                 floating: true,
-                                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
+                                backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) ||
+                                    '#FFFFFF',
                                 borderWidth: 1
                             },
                             plotOptions: {
@@ -511,9 +564,9 @@
             created: function () {
                 this.get_all_results(true);
                 setInterval(this.refresh_result_list, 3000);
+                setInterval(this.peek_task, 3000);
             }
         });
-
     </script>
 
 </body>
