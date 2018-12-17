@@ -12,8 +12,12 @@ if ($conn->connect_error) {
 }
 
 $ids = $_POST['ids'];
-
-$result = $conn->query('SELECT id, result_file, result_file_content FROM datalist WHERE id IN ' . $ids) or die($conn->errno . ':' . $conn->error);
+if ($ids=='all'){
+    $result = $conn->query('SELECT id, result_file, result_file_content FROM datalist') or die($conn->errno . ':' . $conn->error);
+}
+else {
+    $result = $conn->query('SELECT id, result_file, result_file_content FROM datalist WHERE id IN ' . $ids) or die($conn->errno . ':' . $conn->error);
+}
 
 $rows = $result->fetch_all();
 echo json_encode($rows);

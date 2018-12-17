@@ -26,7 +26,7 @@ if ($current_status == 0) //free
 {
     $conn->query('
     UPDATE taskstatus SET havetask=1 ,sample_id=' . $sample_id . ',
-    temp=' . $temp . ', humidity=' . $humidity . ', pigment=' . $pigment . ', tweight=' . $tweight);
+    temp="' . $temp . '", humidity="' . $humidity . '", pigment="' . $pigment . '", tweight="' . $tweight.'"');
     echo "1";
 } else {
     echo "0";

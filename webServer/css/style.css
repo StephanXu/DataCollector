@@ -1,0 +1,145 @@
+@font-face {
+    font-family: pf-heavy;
+    src: url('../font/PingFang Heavy.ttf');
+}
+
+@font-face {
+    font-family: pf-mid;
+    src: url('../font/PingFang Medium.ttf');
+}
+
+@font-face {
+    font-family: pf-light;
+    src: url('../font/PingFang Light.ttf');
+}
+
+.heavy_text {
+    font-family: pf-heavy;
+}
+
+.mid_text {
+    font-family: pf-mid;
+}
+
+.light_text {
+    font-family: pf-light;
+}
+
+
+.control_btn {
+    color: #181818;
+    position: relative;
+    float: right;
+    top: 0px;
+    width: 45px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 1.1em;
+    z-index: 999;
+    transition: 0.5s;
+    -webkit-app-region: no-drag;
+}
+
+.control_btn:hover {
+    color: #181818;
+    position: relative;
+    float: right;
+    right: 0px;
+    top: 0px;
+    width: 45px;
+    height: 30px;
+    line-height: 30px;
+    z-index: 999;
+    font-size: 1.1em;
+    transition: 0.5s;
+    -webkit-app-region: no-drag;
+}
+
+
+.shutdown_btn {
+    background-color: none;
+    right: 0px;
+}
+
+.shutdown_btn:hover {
+    background: #cd1a2b;
+    right: 0px;
+}
+
+.maximize_btn {
+    background-color: none;
+    right: 0px;
+    font-size: 0.9em;
+}
+
+.maximize_btn:hover {
+    background: #e5e5e5;
+    right: 0px;
+    font-size: 0.9em;
+}
+
+.minimize_btn {
+    background-color: none;
+    right: 0px;
+    font-size: 0.9em;
+}
+
+.minimize_btn:hover {
+    background: #e5e5e5;
+    right: 0px;
+    font-size: 0.9em;
+}
+
+@keyframes icon-spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+    }
+
+    100% {
+        -webkit-transform: rotate(359deg);
+        transform: rotate(359deg);
+    }
+}
+
+.icon-spin {
+    animation: icon-spin 2s infinite linear;
+}
+
+.data_table:hover {
+    background-color: #EEEEEE;
+    transition: 0.2s;
+}
+
+.data_table {
+    transition: 0.2s;
+}
+
+.data_selected {
+    background-color: #eee;
+}
+
+.data_warning_1{
+    background-color: #ffe0b2;
+}
+
+.data_warning_0{
+    background-color: #fff;
+}
+
+.data_warning_2{
+    background-color: #ffcc80;
+}
+
+.data_warning_3{
+    background-color: #ffb740;
+}
+
+.data_warning_4{
+    background-color: #ffa726;
+}
+
+.data_warning_5{
+    background-color: #ff9800;
+}
+
