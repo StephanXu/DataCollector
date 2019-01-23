@@ -4,6 +4,7 @@ var vm = new Vue({
         result_list: [],
         result_max_val: [],
         task_processing: false,
+        show_range: [],
 
         input_si: '',
         input_tm: '',
@@ -19,6 +20,8 @@ var vm = new Vue({
         change_wt: '',
 
         compareList: [],
+
+        showLen: 30,
     },
     computed: {
         startBtnClass: function () {
@@ -30,14 +33,6 @@ var vm = new Vue({
                 'button-circle': this.task_processing,
                 'button-caution': this.task_processing,
             }
-        },
-
-        sorted_list: function () {
-            var list = this.result_list;
-            list.sort((lh, rh) => {
-                return rh[0] - lh[0];
-            });
-            return list;
         },
 
         table_item_style: function () {
@@ -57,9 +52,11 @@ var vm = new Vue({
 
         table_item_max_warning: function () {
             return function (item) {
-                if (this.result_max_val.length != this.result_list.length)
+                if (this.result_max_val.length != this.result_list.length) {
                     return {};
-                var max_val = this.result_max_val[eval(item)];
+                }
+                var max_val = this.result_max_val[eval(
+                    item)];
                 var level = (max_val);
                 level = parseInt(level);
                 if (level > 5) level = 5;
@@ -81,7 +78,8 @@ var vm = new Vue({
             $.ajaxSettings.async = false;
             var res;
             $.post('getlist.php', {
-                sp: id
+                sp: id,
+                ln: this.showLen,
             }, function (result) {
                 res = JSON.parse(result);
             });
@@ -112,7 +110,8 @@ var vm = new Vue({
             var ret_obj = [];
             $.ajaxSettings.async = true;
             $.post('getgraph.php', {
-                ids: 'all'
+                ids: 'all',
+                ln: this.showLen,
             }, function (result) {
                 ret_obj = JSON.parse(result);
                 var series_obj = [];
@@ -127,7 +126,8 @@ var vm = new Vue({
         get_all_results: function (async_flag) {
             $.ajaxSettings.async = async_flag;
             $.post('getlist.php', {
-                sp: "all"
+                sp: "all",
+                ln: this.showLen,
             }, function (result) {
                 var origin_ret = JSON.parse(result);
 
@@ -135,6 +135,15 @@ var vm = new Vue({
                     var c = eval(origin_ret[i][6]) / eval(origin_ret[i][7]) * 100000;
                     origin_ret[i].splice(8, 0, c.toFixed(8).toString());
                 }
+
+                var new_show_range = [eval(origin_ret[0][0]), eval(origin_ret[origin_ret.length - 1][0])];
+                if (new_show_range != vm.show_range) {
+                    if (vm.showLen < 100) {
+                        vm.refresh_max_value();
+                    }
+                    vm.show_range = new_show_range;
+                }
+
                 vm.result_list = origin_ret;
             });
         },

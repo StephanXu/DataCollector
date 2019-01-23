@@ -14,6 +14,7 @@
             <th>湿度</th>
             <th>色素质量</th>
             <th>总重</th>
+            <th>色素种类</th>
             <th>结果文件</th>
             <th>生成时间</th>
             <th>文件内容</th>
@@ -31,9 +32,9 @@
         }
         $special = $_GET['sp'];
         if ($special == 'all') {
-            $result = $conn->query('SELECT id,sample_id,scan_speed,result_index,temp,humidity,pigment,tweight,result_file,addtime,result_file_content FROM datalist') or die($conn->errno . ':' . $conn->error);
+            $result = $conn->query('SELECT id,sample_id,scan_speed,result_index,temp,humidity,pigment,tweight,pigment_collection,result_file,addtime,result_file_content FROM datalist') or die($conn->errno . ':' . $conn->error);
         } else {
-            $result = $conn->query('SELECT id,sample_id,scan_speed,result_index,temp,humidity,pigment,tweight,result_file,addtime,result_file_content FROM datalist WHERE id=' . $special) or die($conn->errno . ':' . $conn->error);
+            $result = $conn->query('SELECT id,sample_id,scan_speed,result_index,temp,humidity,pigment,tweight,pigment_collection,result_file,addtime,result_file_content FROM datalist WHERE id=' . $special) or die($conn->errno . ':' . $conn->error);
         }
         $rows = $result->fetch_all();
         // echo json_encode($rows);

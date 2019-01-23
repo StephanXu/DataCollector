@@ -90,9 +90,20 @@
                 <hr />
             </div>
         </div>
+        <div>
+            <div class="col-xs-12">
+                <select class="form-control" v-model="showLen">
+                    <option :value="30">30</option>
+                    <option :value="60">60</option>
+                    <option :value="100">100</option>
+                    <option :value="200">200</option>
+                    <option :value="500">500</option>
+                    <option :value="99999">All</option>
+                </select>
+            </div>
+        </div>
         <div class="row">
             <div class="col-xs-12">
-
                 <div class="container-fluid">
                     <div class="table-responsive mid_text">
                         <table class="table">
@@ -107,6 +118,7 @@
                                     <th>色素质量</th>
                                     <th>总重</th>
                                     <th>色素含量(万分之一)</th>
+                                    <th>色素种类</th>
                                     <th>结果文件</th>
                                     <th>生成时间</th>
                                     <th>编辑</th>
@@ -114,7 +126,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr class="data_table" :class="table_item_max_warning(item[0])" v-for="item in sorted_list">
+                                <tr class="data_table" :class="table_item_max_warning(index)" v-for="(item,index) in result_list">
                                     <td v-for="con in item">{{con}}</td>
                                     <td>
                                         <button @click="show_edit_block(item[0]);" class="button button-large button-inverse button-border button-circle button-tiny"><i

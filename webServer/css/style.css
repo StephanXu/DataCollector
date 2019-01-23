@@ -1,16 +1,16 @@
 @font-face {
     font-family: pf-heavy;
-    src: url('../font/PingFang Heavy.ttf');
+    src: url('../font/PingFang-Heavy.woff');
 }
 
 @font-face {
     font-family: pf-mid;
-    src: url('../font/PingFang Medium.ttf');
+    src: url('../font/PingFang-Medium.woff');
 }
 
 @font-face {
     font-family: pf-light;
-    src: url('../font/PingFang Light.ttf');
+    src: url('../font/PingFang-Light.woff');
 }
 
 .heavy_text {
