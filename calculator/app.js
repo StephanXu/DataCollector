@@ -24,7 +24,7 @@ function createWindow() {
         }
     });
 
-    mainWindow.openDevTools({ mode: 'bottom' });
+    // mainWindow.openDevTools({ mode: 'bottom' });
 
     // 通过浏览器窗口对象加载index.html文件，同时也是可以加载一个互联网地址的
     mainWindow.loadURL('file://' + __dirname + '/client/index.html');
