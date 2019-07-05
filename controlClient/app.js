@@ -18,13 +18,16 @@ function createWindow() {
         height: 720,
         frame: false,
         icon: __dirname + '/client/favicon.ico',
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        webPreferences: {
+            nodeIntegration: true
+        }
     });
 
-    mainWindow.openDevTools({ mode: 'bottom' });
+    // mainWindow.openDevTools({ mode: 'bottom' });
 
     // 通过浏览器窗口对象加载index.html文件，同时也是可以加载一个互联网地址的
-    mainWindow.loadURL('http://192.168.31.185:13500/');
+    mainWindow.loadURL('http://titanx.lorime.shop:13500/');
     // 同时也可以简化成：mainWindow.loadURL('./index.html');
 
     // 监听浏览器窗口对象是否关闭，关闭之后直接将mainWindow指向空引用，也就是回收对象内存空间
