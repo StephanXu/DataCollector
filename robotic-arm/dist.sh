@@ -1,0 +1,1 @@
+pyinstaller -n robotic-arm --add-data ./assets/*:./ -F ./robotic_arm.py --key stephanxu

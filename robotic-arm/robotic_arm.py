@@ -2,7 +2,9 @@ from absl import app, flags, logging
 from utils import delay
 from apis import NetworkAPI
 from script_operation import ScriptOperation
+
 import os
+import sys
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string('server', 'http://127.0.0.1:8080/api/', 'Backend host.')
@@ -12,8 +14,6 @@ flags.DEFINE_string('spectra-output-dir',
 flags.DEFINE_string('output-dir',
                     'C:\\Users\\lorime\\Desktop\\SPoutput\\',
                     'output directory.')
-flags.DEFINE_string('base-dir',
-                    'C:\\Users\\lorime\\Downloads\\RoboticArm\\assets-2021', 'base directory.')
 
 spectra_output_dir = ''
 output_dir = ''
@@ -49,12 +49,19 @@ def scan_sample(sop: ScriptOperation, sample_id: int):
     return result_file
 
 
+def get_path(filename):
+    bundle_dir = getattr(
+        sys, '_MEIPASS', os.path.abspath(os.path.dirname(__file__)))
+    path = os.path.join(bundle_dir, filename)
+    return path
+
+
 def main(argv):
     global spectra_output_dir
     global output_dir
     del argv
     api = NetworkAPI(FLAGS.server)
-    sop = ScriptOperation(FLAGS.get_flag_value('base-dir',None))
+    sop = ScriptOperation(FLAGS.get_flag_value(get_path('assets'), None))
     spectra_output_dir = FLAGS.get_flag_value('spectra-output-dir', None)
     output_dir = FLAGS.get_flag_value('output-dir', None)
     logging.info('Start in 3s...')
@@ -65,20 +72,21 @@ def main(argv):
         tasks = api.fetch_new_tasks()
         if len(tasks) == 0:
             continue
-        logging.info(f'Received {len(tasks)} tasks.')
-        for task in tasks:
-            result_file = scan_sample(sop, task['sampleId'])
-            with open(os.path.join(spectra_output_dir, result_file), 'r') as res_file:
-                content = res_file.read()
-                with open(os.path.join(output_dir, f'sample-{task["sampleId"]}.spa'), 'w') as cpy_file:
-                    cpy_file.write(content)
-                submit_res = api.submit_result(task['id'],
-                                               result_file,
-                                               content)
-                if submit_res['msg'] == 'ok':
-                    logging.info(f'Submit sample {task["sampleId"]} success')
-                else:
-                    logging.error(f'Submit sample {task["sampleId"]} failed')
+        task = tasks[0]
+        
+        logging.info(f'Received task: {task["sampleId"]}.')
+        result_file = scan_sample(sop, task['sampleId'])
+        with open(os.path.join(spectra_output_dir, result_file), 'r') as res_file:
+            content = res_file.read()
+            with open(os.path.join(output_dir, f'sample-{task["sampleId"]}.spa'), 'w') as cpy_file:
+                cpy_file.write(content)
+            submit_res = api.submit_result(task['id'],
+                                            result_file,
+                                            content)
+            if submit_res['msg'] == 'ok':
+                logging.info(f'Submit sample {task["sampleId"]} success')
+            else:
+                logging.error(f'Submit sample {task["sampleId"]} failed')
         delay(1000)
 
 
