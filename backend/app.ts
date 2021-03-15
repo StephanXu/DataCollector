@@ -14,7 +14,7 @@ createConnection().then(connection => {
     app.use(bodyParser.json());
 
     app.use('/api/task', task);
-
+    app.use('', express.static('./static'))
     const server = app.listen(app.get("port"))
 
     console.log(`App is running on http://localhost:${app.get("port")} in ${app.get("env")} mode`);

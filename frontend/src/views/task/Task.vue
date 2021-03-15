@@ -44,7 +44,7 @@
                   <v-btn
                     depressed
                     color="primary"
-                    :loading="detecting | loading"
+                    :loading="detecting || loading"
                     @click="addTask"
                     large
                     style="width: 100%"
@@ -64,6 +64,8 @@
             :items="tasks"
             :headers="taskListHeaders"
             item-key="sampleId"
+            sort-by="addTime"
+            :sort-desc="true"
           >
             <template v-slot:item.addTime="{ item }">
               {{ new Date(item.addTime).toLocaleString() }}
@@ -109,7 +111,7 @@ import {
 export default class TaskView extends Vue {
   private newTask = new AddTaskRequest();
   private tasks: Task[] = [];
-  private detecting = false;
+  private detecting = true;
   private loading = false;
 
   private taskListHeaders = [
@@ -133,7 +135,6 @@ export default class TaskView extends Vue {
 
   public async refreshTask() {
     this.tasks = await fetchTask();
-    console.log(await fetchTask());
   }
 
   public async syncUnifinishedTask() {
@@ -167,9 +168,13 @@ export default class TaskView extends Vue {
   }
 
   @Watch("detecting")
-  onDetectingChange(val: boolean, oldVal: boolean) {
+  async onDetectingChange(val: boolean, oldVal: boolean) {
     if (val != oldVal) {
-      this.refreshTask();
+      await this.refreshTask();
+    }
+    if (!val && oldVal && this.tasks.length > 0) {
+      this.newTask.sampleId =
+        this.tasks.map((item) => item.sampleId).sort((a, b) => b - a)[0] + 1;
     }
   }
 }

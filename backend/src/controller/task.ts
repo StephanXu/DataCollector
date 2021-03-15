@@ -60,6 +60,21 @@ async function submitTaskResult(request: Request, response: Response) {
     response.json({ msg: 'ok' });
 }
 
+async function getTaskResult(request: Request, response: Response) {
+    let task = await Task.findOne({ where: { id: request.params.taskId } });
+    if (!task) {
+        response.status(404).json({ msg: 'can not find the task' });
+        return;
+    }
+    if (task.status != 'finished') {
+        response.status(500).json({ msg: 'task have not finished yet' });
+        return;
+    }
+    return response.json({
+        content: task.resultContent
+    });
+}
+
 router.route('/')
     .get(getTasks)
     .post(addTask);
