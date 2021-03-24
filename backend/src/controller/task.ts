@@ -8,6 +8,23 @@ async function getTasks(request: Request, response: Response) {
         response.json(await Task.find({ where: { status: 'unfinished' } }));
         return
     }
+    response.json(await Task.find({
+        select: [
+            'id',
+            'sampleId',
+            'pigment',
+            'pigmentWeight',
+            'sampleWeight',
+            'resultFilename',
+            'addTime',
+            'finishTime',
+            'status',
+        ]
+    }));
+    return;
+}
+
+async function getTasksContent(request: Request, response: Response) {
     response.json(await Task.find());
     return;
 }
@@ -81,5 +98,8 @@ router.route('/')
 
 router.route('/:taskId')
     .post(submitTaskResult);
+
+router.route('/result')
+    .get(getTasksContent);
 
 export default router;
