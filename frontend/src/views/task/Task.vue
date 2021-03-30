@@ -84,11 +84,11 @@
               {{ item.status === "finished" ? item.resultFilename : "不可用" }}
             </template>
             <template v-slot:item.operation="{ item }">
-              <v-btn text @click="editTask(item)" color="primary">
-                <v-icon left>mdi-square-edit-outline</v-icon>编辑
+              <v-btn icon @click="editTask(item)" color="primary">
+                <v-icon>mdi-square-edit-outline</v-icon>
               </v-btn>
-              <v-btn text color="primary">
-                <v-icon left>mdi-chart-bell-curve</v-icon>曲线
+              <v-btn icon color="primary">
+                <v-icon>mdi-chart-bell-curve</v-icon>
               </v-btn>
             </template>
           </v-data-table>
@@ -173,8 +173,9 @@ export default class TaskView extends Vue {
       await this.refreshTask();
     }
     if (!val && oldVal && this.tasks.length > 0) {
-      this.newTask.sampleId =
-        this.tasks.map((item) => item.sampleId).sort((a, b) => b - a)[0] + 1;
+      const sorted = this.tasks.sort((a, b) => b.sampleId - a.sampleId);
+      this.newTask.sampleId =sorted[0].sampleId + 1;
+      this.newTask.pigment = sorted[0].pigment
     }
   }
 }
