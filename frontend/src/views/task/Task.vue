@@ -8,50 +8,73 @@
           <v-card-text>
             <v-form :disabled="detecting">
               <v-row>
-                <v-col cols="12" md="2">
+                <v-col>
                   <v-text-field
                     label="样本编号"
                     v-model.number="newTask.sampleId"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12" md="2">
-                  <v-text-field
-                    label="色素名称"
-                    v-model="newTask.pigment"
-                    placeholder="色素名称"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="2">
-                  <v-text-field
-                    label="色素质量(g)"
-                    v-model.number="newTask.pigmentWeight"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="2">
-                  <v-text-field
-                    label="样本质量(g)"
-                    v-model.number="newTask.sampleWeight"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="2">
-                  <v-text-field
-                    label="色素浓度"
-                    v-model.number="concentration"
-                    disabled
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" md="2">
+              </v-row>
+              <v-card
+                class="mb-4"
+                flat
+                v-for="(value, idx) in newTask.pigment"
+                :key="idx"
+              >
+                <v-divider />
+                <v-row>
+                  <v-col md="5">
+                    <v-text-field
+                      label="色素名称"
+                      v-model="newTask.pigment[idx]"
+                      placeholder="色素名称"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col md="5">
+                    <v-text-field
+                      label="阶段色素质量(g)"
+                      v-model.number="newTask.pigmentWeight[idx]"
+                    ></v-text-field>
+                  </v-col>
+                  <v-col md="2">
+                    <v-btn
+                      depressed
+                      color="error"
+                      text
+                      large
+                      @click="deletePigment(idx)"
+                    >
+                      <v-icon left>mdi-minus</v-icon>移除
+                    </v-btn>
+                  </v-col>
+                </v-row>
+              </v-card>
+              <v-row>
+                <v-col>
                   <v-btn
                     depressed
                     color="primary"
-                    :loading="detecting || loading"
-                    @click="addTask"
                     large
                     style="width: 100%"
-                    ><v-icon left>mdi-send</v-icon>发送</v-btn
+                    @click="addPigment()"
+                  >
+                    添加新色素</v-btn
                   >
                 </v-col>
               </v-row>
+              <v-text-field
+                label="样本质量(g)"
+                v-model.number="newTask.sampleWeight"
+              ></v-text-field>
+              <v-btn
+                depressed
+                color="primary"
+                :loading="detecting || loading"
+                @click="addTask"
+                large
+                style="width: 100%"
+                ><v-icon left>mdi-send</v-icon>发送</v-btn
+              >
             </v-form>
           </v-card-text>
         </v-card>
@@ -67,23 +90,23 @@
             sort-by="addTime"
             :sort-desc="true"
           >
-            <template v-slot:item.addTime="{ item }">
+            <template v-slot:[`item.addTime`]="{ item }">
               {{ new Date(item.addTime).toLocaleString() }}
             </template>
-            <template v-slot:item.finishTime="{ item }">
+            <template v-slot:[`item.finishTime`]="{ item }">
               {{
                 item.status === "finished"
                   ? new Date(item.finishTime).toLocaleString()
                   : "未完成"
               }}
             </template>
-            <template v-slot:item.status="{ item }">
+            <template v-slot:[`item.status`]="{ item }">
               {{ item.status === "unfinished" ? "进行中" : "完成" }}
             </template>
-            <template v-slot:item.resultFilename="{ item }">
+            <template v-slot:[`item.resultFilename`]="{ item }">
               {{ item.status === "finished" ? item.resultFilename : "不可用" }}
             </template>
-            <template v-slot:item.operation="{ item }">
+            <template v-slot:[`item.operation`]="{ item }">
               <v-btn icon @click="editTask(item)" color="primary">
                 <v-icon>mdi-square-edit-outline</v-icon>
               </v-btn>
@@ -107,11 +130,26 @@ import {
   fetchUnfinishedTask,
   Task,
 } from "@/api/task";
+
+class NewTaskForm {
+  stagePigmentWeight: number[] = [];
+}
+
 @Component
 export default class TaskView extends Vue {
-  private newTask = new AddTaskRequest();
+  private newTask: AddTaskRequest = {
+    sampleId: 0,
+    pigment: [],
+    pigmentWeight: [],
+    sampleWeight: 0,
+  };
+
+  private newTaskForm: NewTaskForm = {
+    stagePigmentWeight: [],
+  };
+
   private tasks: Task[] = [];
-  private detecting = true;
+  private detecting = false;
   private loading = false;
 
   private taskListHeaders = [
@@ -128,6 +166,9 @@ export default class TaskView extends Vue {
 
   public async addTask() {
     this.loading = true;
+    this.calculateStagePigmentWeight();
+    console.log(this.newTaskForm.stagePigmentWeight);
+    console.log(this.newTask.pigment);
     await addTask(this.newTask);
     this.detecting = true;
     this.loading = false;
@@ -161,10 +202,18 @@ export default class TaskView extends Vue {
   }
 
   get concentration() {
-    if (this.newTask.sampleWeight == 0) {
-      return "不可用";
+    const concentration: number[] = [];
+
+    for (let i = 0; i < this.newTask.pigmentWeight.length; i++) {
+      if (this.newTaskForm.stagePigmentWeight[i] == 0) {
+        return "不可用";
+      }
+      concentration.push(
+        Number(this.newTask.pigmentWeight[i]) /
+          this.newTaskForm.stagePigmentWeight[i]
+      );
     }
-    return this.newTask.pigmentWeight / this.newTask.sampleWeight;
+    return concentration;
   }
 
   @Watch("detecting")
@@ -174,8 +223,31 @@ export default class TaskView extends Vue {
     }
     if (!val && oldVal && this.tasks.length > 0) {
       const sorted = this.tasks.sort((a, b) => b.sampleId - a.sampleId);
-      this.newTask.sampleId =sorted[0].sampleId + 1;
-      this.newTask.pigment = sorted[0].pigment
+      this.newTask.sampleId = sorted[0].sampleId + 1;
+      this.newTask.pigment = sorted[0].pigment;
+    }
+  }
+
+  //新增色素
+  public addPigment() {
+    this.newTask.pigment.push(" ");
+    this.newTask.pigmentWeight.push(0);
+  }
+
+  //删除色素
+  public deletePigment(idx: any) {
+    this.newTask.pigment.splice(idx, 1);
+    this.newTask.pigmentWeight.splice(idx, 1);
+  }
+
+  //计算阶段色素质量
+  public calculateStagePigmentWeight() {
+    let preStage = 0;
+    for(const idx of this.newTask.pigmentWeight) {
+      this.newTaskForm.stagePigmentWeight.push(
+        idx - preStage
+      );
+      preStage = idx;
     }
   }
 }
