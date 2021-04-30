@@ -2,16 +2,16 @@ import request from '@/utils/request'
 
 export class AddTaskRequest {
     sampleId = 0;
-    pigment = '';
-    pigmentWeight = 0;
+    pigment: string[] = [];
+    pigmentWeight: number[] = [];
     sampleWeight = 0;
 }
 
 export class Task {
     id = 0;
     sampleId = 0;
-    pigment = '';
-    pigmentWeight = 0;
+    pigment: string[] = [];
+    pigmentWeight: number[] = [];
     sampleWeight = 0;
     resultFilename = '';
     resultContent = '';
