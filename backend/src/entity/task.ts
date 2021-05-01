@@ -13,8 +13,8 @@ export class Task extends BaseEntity {
     @Column()
     pigment: string;
 
-    @Column("double")
-    pigmentWeight: number;
+    @Column()
+    pigmentWeight: string;
 
     @Column("double")
     sampleWeight: number;
