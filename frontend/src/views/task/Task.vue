@@ -33,7 +33,7 @@
                   <v-col md="5">
                     <v-text-field
                       label="阶段色素质量(g)"
-                      v-model.number="newTask.pigmentWeight[idx]"
+                      v-model.number="newTask.stagePigmentWeight[idx]"
                     ></v-text-field>
                   </v-col>
                   <v-col md="2">
@@ -131,22 +131,22 @@ import {
   Task,
 } from "@/api/task";
 
-class NewTaskForm {
-  stagePigmentWeight: number[] = [];
-}
+// class NewTaskForm {
+//   stagePigmentWeight: number[] = [];
+// }
 
 @Component
 export default class TaskView extends Vue {
   private newTask: AddTaskRequest = {
     sampleId: 0,
     pigment: [],
-    pigmentWeight: [],
+    stagePigmentWeight: [],
     sampleWeight: 0,
   };
 
-  private newTaskForm: NewTaskForm = {
-    stagePigmentWeight: [],
-  };
+  // private newTaskForm: NewTaskForm = {
+  //   stagePigmentWeight: [],
+  // };
 
   private tasks: Task[] = [];
   private detecting = false;
@@ -154,8 +154,8 @@ export default class TaskView extends Vue {
 
   private taskListHeaders = [
     { text: "样本编号", value: "sampleId" },
-    { text: "色素种类", value: "pigment" },
-    { text: "色素质量(g)", value: "pigmentWeight" },
+    { text: "色素种类", value: "pigment[]" },
+    { text: "阶段色素质量(g)", value: "pigmentWeight[]" },
     { text: "样本质量(g)", value: "sampleWeight" },
     { text: "结果文件", value: "resultFilename" },
     { text: "添加时间", value: "addTime" },
@@ -167,7 +167,7 @@ export default class TaskView extends Vue {
   public async addTask() {
     this.loading = true;
     this.calculateStagePigmentWeight();
-    console.log(this.newTaskForm.stagePigmentWeight);
+    // console.log(this.newTaskForm.stagePigmentWeight);
     console.log(this.newTask.pigment);
     await addTask(this.newTask);
     this.detecting = true;
@@ -184,7 +184,7 @@ export default class TaskView extends Vue {
       this.detecting = true;
       this.newTask.sampleId = t[0].sampleId;
       this.newTask.pigment = t[0].pigment;
-      this.newTask.pigmentWeight = t[0].pigmentWeight;
+      this.newTask.stagePigmentWeight = t[0].stagePigmentWeight;
       this.newTask.sampleWeight = t[0].sampleWeight;
     } else {
       this.detecting = false;
@@ -204,13 +204,13 @@ export default class TaskView extends Vue {
   get concentration() {
     const concentration: number[] = [];
 
-    for (let i = 0; i < this.newTask.pigmentWeight.length; i++) {
-      if (this.newTaskForm.stagePigmentWeight[i] == 0) {
+    for (let i = 0; i < this.newTask.stagePigmentWeight.length; i++) {
+      if (this.newTask.stagePigmentWeight[i] == 0) {
         return "不可用";
       }
       concentration.push(
-        Number(this.newTask.pigmentWeight[i]) /
-          this.newTaskForm.stagePigmentWeight[i]
+        Number(this.newTask.stagePigmentWeight[i]) /
+          this.newTask.stagePigmentWeight[i]
       );
     }
     return concentration;
@@ -231,23 +231,21 @@ export default class TaskView extends Vue {
   //新增色素
   public addPigment() {
     this.newTask.pigment.push(" ");
-    this.newTask.pigmentWeight.push(0);
+    this.newTask.stagePigmentWeight.push(0);
   }
 
   //删除色素
   public deletePigment(idx: any) {
     this.newTask.pigment.splice(idx, 1);
-    this.newTask.pigmentWeight.splice(idx, 1);
+    this.newTask.stagePigmentWeight.splice(idx, 1);
   }
 
   //计算阶段色素质量
   public calculateStagePigmentWeight() {
-    let preStage = 0;
-    for(const idx of this.newTask.pigmentWeight) {
-      this.newTaskForm.stagePigmentWeight.push(
-        idx - preStage
-      );
-      preStage = idx;
+    for(let idx = 1; idx < this.newTask.stagePigmentWeight.length; idx++) {
+      this.newTask.stagePigmentWeight[idx] - this.newTask.stagePigmentWeight[idx-1];
+      console.log(this.newTask.stagePigmentWeight);
+      // this.newTask.stagePigmentWeight[idx] = 
     }
   }
 }
