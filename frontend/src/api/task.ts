@@ -3,7 +3,7 @@ import request from '@/utils/request'
 export class AddTaskRequest {
     sampleId = 0;
     pigment: string[] = [];
-    stagePigmentWeight: number[] = [];
+    pigmentWeight: number[] = [];
     sampleWeight = 0;
 }
 
@@ -11,7 +11,7 @@ export class Task {
     id = 0;
     sampleId = 0;
     pigment: string[] = [];
-    stagePigmentWeight: number[] = [];
+    pigmentWeight: number[] = [];
     sampleWeight = 0;
     resultFilename = '';
     resultContent = '';
