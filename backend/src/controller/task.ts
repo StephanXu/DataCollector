@@ -2,25 +2,49 @@ import { Router, Request, Response } from 'express'
 import { Task } from '../entity/task'
 
 const router = Router();
+export class TaskDesc {
+    id = 0;
+    sampleId = 0;
+    pigment: string[] = [];
+    pigmentWeight: number[] = [];
+    sampleWeight = 0;
+    resultFilename = '';
+    resultContent = '';
+    addTime = new Date;
+    finishTime = new Date;
+    status = '';
+}
 
 async function getTasks(request: Request, response: Response) {
-    if (request.query.status) {
-        response.json(await Task.find({ where: { status: 'unfinished' } }));
-        return
-    }
-    response.json(await Task.find({
-        select: [
-            'id',
-            'sampleId',
-            'pigment',
-            'pigmentWeight',
-            'sampleWeight',
-            'resultFilename',
-            'addTime',
-            'finishTime',
-            'status',
-        ]
-    }));
+    let task = await Task.find(request.query.status
+        ? { where: { status: 'unfinished' } }
+        : {
+            select: [
+                'id',
+                'sampleId',
+                'pigment',
+                'pigmentWeight',
+                'sampleWeight',
+                'resultFilename',
+                'addTime',
+                'finishTime',
+                'status',
+            ]
+        });
+
+    response.json(task.map((val) => {
+        return {
+            id: val.id,
+            sampleId: val.sampleId,
+            pigment: val.pigment.split(','),
+            pigmentWeight: val.pigmentWeight.split(',').map(v => parseFloat(v)),
+            sampleWeight: val.sampleWeight,
+            resultFilename: val.resultFilename,
+            addTime: val.addTime,
+            finishTime: val.finishTime,
+            status: val.status
+        } as TaskDesc
+    }))
     return;
 }
 
@@ -30,10 +54,10 @@ async function getTasksContent(request: Request, response: Response) {
 }
 
 class AddTaskRequest {
-    sampleId: number;
-    pigment: string;
-    pigmentWeight: number;
-    sampleWeight: number;
+    sampleId = 0;
+    pigment: string[] = [];
+    pigmentWeight: number[] = [];
+    sampleWeight = 0;
 }
 
 async function addTask(request: Request, response: Response) {
@@ -45,8 +69,8 @@ async function addTask(request: Request, response: Response) {
     let newTask = new Task();
     let params: AddTaskRequest = request.body;
     newTask.sampleId = params.sampleId;
-    newTask.pigment = params.pigment;
-    newTask.pigmentWeight = params.pigmentWeight;
+    newTask.pigment = params.pigment.join(',');
+    newTask.pigmentWeight = params.pigmentWeight.join(',');
     newTask.sampleWeight = params.sampleWeight;
     newTask.resultFilename = '';
     newTask.resultContent = '';
