@@ -1,10 +1,12 @@
 <template>
   <v-container>
     <v-row>
-      <v-col cols="12">
-        <!-- <span class="text-h3">{{ detecting ? "Detecting" : "New Task" }}</span> -->
-
-        <v-form :disabled="detecting">
+      <v-col md="4">
+        <div class="mb-4 ms-2">
+          <h1>{{ detecting ? "正在检测" : "新任务" }}</h1>
+          <span class="text-subtitle-1">创建新任务</span>
+        </div>
+        <v-form :disabled="detecting" style="max-width: 750px">
           <v-card class="mb-4 rounded-xl" outlined>
             <v-card-text>
               <v-text-field
@@ -38,7 +40,7 @@
                 color="error"
                 rounded
                 @click="deletePigment(idx)"
-                :disabled="newTaskForm.pigment.length == 1"
+                :disabled="newTaskForm.pigment.length == 1 || detecting"
               >
                 <v-icon left>mdi-minus</v-icon>Remove
               </v-btn>
@@ -73,10 +75,12 @@
           </v-btn>
         </v-form>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col cols="12">
-        <v-card outlined>
+      <v-col md="8">
+        <div class="mb-4 ms-2">
+          <h1>任务列表</h1>
+          <span class="text-subtitle-1">所有任务</span>
+        </div>
+        <v-card outlined class="rounded-xl">
           <v-data-table
             :items="tasks"
             :headers="taskListHeaders"
@@ -124,6 +128,7 @@ import {
   fetchUnfinishedTask,
   Task,
 } from "@/api/task";
+import Big from "big.js";
 
 class NewTaskForm {
   sampleId = 0;
@@ -157,8 +162,10 @@ export default class TaskView extends Vue {
     const taskReq: AddTaskRequest = {
       sampleId: this.newTaskForm.sampleId,
       pigment: this.newTaskForm.pigment,
-      pigmentWeight: this.newTaskForm.stagePigmentWeight.map(
-        (val, idx, arr) => val - arr.slice(0, idx).reduce((a, b) => a + b, 0)
+      pigmentWeight: this.newTaskForm.stagePigmentWeight.map((val, idx, arr) =>
+        Big(val)
+          .sub(arr.slice(0, idx).reduce((a, b) => Big(a).add(b).toNumber(), 0))
+          .toNumber()
       ),
       sampleWeight: this.newTaskForm.sampleWeight,
     };
@@ -177,9 +184,11 @@ export default class TaskView extends Vue {
       this.detecting = true;
       this.newTaskForm.sampleId = t[0].sampleId;
       this.newTaskForm.pigment = t[0].pigment;
-      this.newTaskForm.stagePigmentWeight = t[0].pigmentWeight.map(
-        (val, idx, arr) => val + arr.slice(0, idx).reduce((a, b) => a + b, 0)
-      );
+      this.newTaskForm.stagePigmentWeight = t[0].pigmentWeight.map((val, idx, arr) =>
+        Big(val)
+          .add(arr.slice(0, idx).reduce((a, b) => Big(a).add(b).toNumber(), 0))
+          .toNumber()
+      ),
       this.newTaskForm.sampleWeight = t[0].sampleWeight;
     } else {
       this.detecting = false;
