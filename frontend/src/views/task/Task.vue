@@ -30,6 +30,16 @@
               <v-text-field
                 label="阶段色素质量(g)"
                 v-model.number="newTaskForm.stagePigmentWeight[idx]"
+                :rules="[
+                  (v) =>
+                    !!v && idx == 0
+                      ? true
+                      : (newTaskForm.stagePigmentWeight[idx] -
+                          newTaskForm.stagePigmentWeight[idx - 1] >
+                        0
+                          ? true
+                          : false) || '此处色素质量不对',
+                ]"
               ></v-text-field>
             </v-card-text>
             <v-card-actions class="mt-n6">
@@ -60,6 +70,15 @@
               <v-text-field
                 label="样本质量(g)"
                 v-model.number="newTaskForm.sampleWeight"
+                :rules="[
+                  (v) =>
+                    (!!v &&
+                      newTaskForm.sampleWeight >
+                        newTaskForm.stagePigmentWeight[
+                          newTaskForm.stagePigmentWeight.length - 1
+                        ]) ||
+                    '此处样本质量不对',
+                ]"
               ></v-text-field>
             </v-card-text>
           </v-card>
@@ -142,7 +161,7 @@ export default class TaskView extends Vue {
   private newTaskForm = new NewTaskForm();
 
   private tasks: Task[] = [];
-  private detecting = true;
+  private detecting = false;
   private loading = false;
 
   private taskListHeaders = [
@@ -184,12 +203,15 @@ export default class TaskView extends Vue {
       this.detecting = true;
       this.newTaskForm.sampleId = t[0].sampleId;
       this.newTaskForm.pigment = t[0].pigment;
-      this.newTaskForm.stagePigmentWeight = t[0].pigmentWeight.map((val, idx, arr) =>
-        Big(val)
-          .add(arr.slice(0, idx).reduce((a, b) => Big(a).add(b).toNumber(), 0))
-          .toNumber()
-      ),
-      this.newTaskForm.sampleWeight = t[0].sampleWeight;
+      (this.newTaskForm.stagePigmentWeight = t[0].pigmentWeight.map(
+        (val, idx, arr) =>
+          Big(val)
+            .add(
+              arr.slice(0, idx).reduce((a, b) => Big(a).add(b).toNumber(), 0)
+            )
+            .toNumber()
+      )),
+        (this.newTaskForm.sampleWeight = t[0].sampleWeight);
     } else {
       this.detecting = false;
     }
