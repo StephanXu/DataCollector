@@ -163,8 +163,8 @@ export default class TaskView extends Vue {
 
   private taskListHeaders = [
     { text: "样本编号", value: "sampleId" },
-    { text: "色素种类", value: "pigment[]" },
-    { text: "阶段色素质量(g)", value: "pigmentWeight[]" },
+    { text: "色素种类", value: "pigment" },
+    { text: "阶段色素质量(g)", value: "pigmentWeight" },
     { text: "样本质量(g)", value: "sampleWeight" },
     { text: "结果文件", value: "resultFilename" },
     { text: "添加时间", value: "addTime" },
