@@ -32,13 +32,10 @@
                 v-model.number="newTaskForm.stagePigmentWeight[idx]"
                 :rules="[
                   (v) =>
-                    !!v && idx == 0
-                      ? true
-                      : (newTaskForm.stagePigmentWeight[idx] -
-                          newTaskForm.stagePigmentWeight[idx - 1] >
-                        0
-                          ? true
-                          : false) || '此处色素质量不对',
+                    (!!v && idx == 0) ||
+                    newTaskForm.stagePigmentWeight[idx] -
+                      newTaskForm.stagePigmentWeight[idx - 1] ||
+                    '非法质量',
                 ]"
               ></v-text-field>
             </v-card-text>
@@ -77,7 +74,7 @@
                         newTaskForm.stagePigmentWeight[
                           newTaskForm.stagePigmentWeight.length - 1
                         ]) ||
-                    '此处样本质量不对',
+                    '非法质量',
                 ]"
               ></v-text-field>
             </v-card-text>
@@ -161,7 +158,7 @@ export default class TaskView extends Vue {
   private newTaskForm = new NewTaskForm();
 
   private tasks: Task[] = [];
-  private detecting = false;
+  private detecting = true;
   private loading = false;
 
   private taskListHeaders = [
