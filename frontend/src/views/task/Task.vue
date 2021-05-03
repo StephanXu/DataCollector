@@ -33,8 +33,8 @@
                 :rules="[
                   (v) =>
                     (!!v && idx == 0) ||
-                    newTaskForm.stagePigmentWeight[idx] -
-                      newTaskForm.stagePigmentWeight[idx - 1] ||
+                    (newTaskForm.stagePigmentWeight[idx] -
+                      newTaskForm.stagePigmentWeight[idx - 1] > 0) ||
                     '非法质量',
                 ]"
               ></v-text-field>
@@ -70,10 +70,10 @@
                 :rules="[
                   (v) =>
                     (!!v &&
-                      newTaskForm.sampleWeight >
+                      newTaskForm.sampleWeight -
                         newTaskForm.stagePigmentWeight[
                           newTaskForm.stagePigmentWeight.length - 1
-                        ]) ||
+                        ] > 0) ||
                     '非法质量',
                 ]"
               ></v-text-field>
